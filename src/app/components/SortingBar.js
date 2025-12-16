@@ -1,29 +1,43 @@
 'use client';
 
+import { motion } from 'framer-motion';
+
 const sortOptions = ["✨ Featured", "💸 Price (Low-High)", "🌟 Top Rated"];
 
-// This component now receives props to manage state and display info
 export default function SortingBar({ activeSort, onSortChange, resultCount }) {
   return (
-    <div className="bg-white p-2 rounded-lg shadow-sm flex items-center justify-between mb-8 flex-wrap gap-4">
-      <div className="flex items-center gap-2">
+    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      
+      {/* Left Side: Sort Options */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="text-sm font-bold text-gray-400 uppercase tracking-wider mr-2">
+          Sort by:
+        </span>
         {sortOptions.map(option => (
-          <button 
+          <motion.button
             key={option}
             onClick={() => onSortChange(option)}
-            className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors duration-200
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 border
               ${activeSort === option 
-                ? 'bg-blue-600 text-white' 
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
+                : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400 hover:text-blue-600'
               }`
             }
           >
             {option}
-          </button>
+          </motion.button>
         ))}
       </div>
-      <p className="text-sm text-gray-600 font-medium">Showing <span className="text-gray-900">{resultCount}</span> packages</p>
+
+      {/* Right Side: Result Count Badge */}
+      <div className="flex items-center bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 self-end sm:self-auto">
+        <span className="text-sm font-medium text-blue-800">
+          Found <span className="font-extrabold">{resultCount}</span> packages
+        </span>
+      </div>
+
     </div>
   );
 }
-

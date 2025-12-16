@@ -25,7 +25,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Embla Carousel Basic Styles */
+/* Embla Carousel Basic Layout */
 .embla {
   overflow: hidden;
 }
@@ -37,7 +37,8 @@ body {
   min-width: 0;
   position: relative;
 }
-/* Embla Carousel Navigation Styles */
+
+/* Embla Carousel Navigation Buttons */
 .embla__button {
   -webkit-appearance: none;
   background-color: transparent;
@@ -49,13 +50,16 @@ body {
   padding: 0;
   margin: 0;
 }
+
+/* --- PREMIUM DOT NAVIGATION STYLES --- */
 .embla__dots {
+  z-index: 20;
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  margin-right: calc((2rem - 0.5rem) / 2 * -1);
+  gap: 12px; /* More comfortable spacing */
 }
+
 .embla__dot {
   -webkit-appearance: none;
   background-color: transparent;
@@ -66,26 +70,31 @@ body {
   border: 0;
   padding: 0;
   margin: 0;
-  width: 2rem;
+  width: 2rem; /* Large touch target area */
   height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
 }
+
+/* The visible part of the dot */
 .embla__dot:after {
-  background-color: hsla(0, 0%, 100%, 0.5);
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
   content: '';
-  transition: background-color 0.2s ease-in-out;
+  width: 10px;    /* visibly larger than before */
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4); /* subtle inactive state */
+  transition: all 0.3s ease-in-out;
+  backdrop-filter: blur(2px);
 }
+
+/* The active dot gets the brand orange and a subtle glow */
 .embla__dot--selected:after {
-  background-color: white;
+  background-color: #f97316; /* Matches Tailwind 'orange-500' */
+  transform: scale(1.4);     /* visually pops */
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.6); /* premium glow effect */
 }
+
 /* Custom styles for PackageCard hover effect */
 .group:hover .group-hover\:scale-110 {
   transform: scale(1.1);
