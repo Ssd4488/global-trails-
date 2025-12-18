@@ -1,6 +1,5 @@
-// src/app/lib/getData.js
 import { db } from "./firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 
 export async function getAllPackages() {
   try {
@@ -13,5 +12,23 @@ export async function getAllPackages() {
   } catch (error) {
     console.error("Error fetching packages:", error);
     return []; // Return empty array on error so the app doesn't crash
+  }
+}
+
+// --- NEW: Fetch a single package by ID ---
+export async function getPackageById(id) {
+  try {
+    const docRef = doc(db, "packages", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    } else {
+      console.error("No such package!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching package:", error);
+    return null;
   }
 }
