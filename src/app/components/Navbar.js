@@ -2,28 +2,26 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation'; // Added useRouter
 import Image from 'next/image';
+import { useAuth } from '../context/AuthContext'; // 1. Import AuthContext
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  
+  // 2. Use real auth state instead of local state
+  const { currentUser, logout } = useAuth(); 
+  const router = useRouter();
   
   // --- HYDRATION FIX ---
-  // This state ensures we don't apply scroll logic until the client has mounted.
   const [isMounted, setIsMounted] = useState(false);
-  // ---------------------
   
   const pathname = usePathname();
 
   useEffect(() => {
-    // --- HYDRATION FIX ---
-    // Now that we are on the client, set mounted to true
     setIsMounted(true);
-    // ---------------------
-
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -36,7 +34,18 @@ export default function Navbar() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []); // Empty dependency array is correct
+  }, []); 
+
+  // 3. Handle Logout Logic
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsOpen(false); // Close mobile menu if open
+      router.push('/login'); // Optional: Redirect to login after logout
+    } catch (error) {
+      console.error("Failed to log out", error);
+    }
+  };
 
   const isActive = (path) => pathname === path;
 
@@ -49,14 +58,8 @@ export default function Navbar() {
     { name: 'Solo Adventures', icon: '🎒', href: '/destinations?mood=Solo+Adventure' },
   ];
 
-  // --- HYDRATION FIX ---
-  // Fixed multi-line string that can cause errors. This must be one line.
   const navLinkHoverClass = `relative text-[17px] font-medium px-3 py-3 transition-all duration-300 group transform hover:-translate-y-0.5 after:absolute after:bottom-2 after:left-0 after:h-[2px] after:w-full after:origin-center after:scale-x-0 after:transition-transform after:duration-300 after:ease-out group-hover:after:scale-x-100`;
-  // ---------------------
 
-  // --- HYDRATION FIX ---
-  // We only apply the 'scrolled' classes IF isMounted is true.
-  // Otherwise, we *always* render the default state, matching the server.
   const navClasses = isMounted && isScrolled
     ? 'bg-blue-600/95 text-white shadow-lg py-3'
     : 'bg-white/90 text-gray-800 shadow-sm py-5';
@@ -77,7 +80,6 @@ export default function Navbar() {
   };
   
   const mobileHamburgerClasses = isMounted && isScrolled ? 'text-white' : 'text-gray-800';
-  // --- END HYDRATION FIX ---
 
   return (
     <nav
@@ -162,34 +164,36 @@ export default function Navbar() {
 
             {/* === AUTH LOGIC === */}
             <div className="flex items-center gap-4">
-              {!isLoggedIn ? (
+              {!currentUser ? (
                 // --- LOGGED-OUT STATE ---
                 <>
-                  <button className={`${linkClasses('/login')} ${isMounted && isScrolled ? 'text-blue-100' : 'text-gray-600'}`}>
+                  <Link href="/login" className={`${linkClasses('/login')} ${isMounted && isScrolled ? 'text-blue-100' : 'text-gray-600'}`}>
                     Log In
-                  </button>
-                  <button className={`px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5
+                  </Link>
+                  <Link href="/register" className={`px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5
                       ${isMounted && isScrolled
                         ? 'bg-white text-blue-600 hover:bg-gray-100'
                         : 'bg-blue-600 text-white hover:bg-blue-700'
                       }`
                   }>
                     Get Started
-                  </button>
+                  </Link>
                 </>
               ) : (
                 // --- LOGGED-IN STATE ---
                 <>
                   <Link
-                    href="/my-bookings"
-                    className={linkClasses('/my-bookings')}
+                    href="/dashboard"
+                    className={linkClasses('/dashboard')}
                   >
-                    My Bookings
+                    Dashboard
                   </Link>
-                  <button className={`p-2 rounded-full transition-all duration-300 transform hover:scale-110
+                  <button 
+                    onClick={handleLogout}
+                    className={`p-2 rounded-full transition-all duration-300 transform hover:scale-110
                     ${isMounted && isScrolled ? 'bg-white/20 hover:bg-white/30' : 'bg-gray-100 hover:bg-gray-200'}`
                   }>
-                    <svg className={`w-6 h-6 ${isMounted && isScrolled ? 'text-white' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <svg className={`w-6 h-6 ${isMounted && isScrolled ? 'text-white' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                   </button>
                 </>
               )}
@@ -227,21 +231,21 @@ export default function Navbar() {
 
           {/* Mobile Auth */}
           <div className="pt-6 flex flex-col gap-3">
-             {!isLoggedIn ? (
+             {!currentUser ? (
               <>
-                <button className="w-full py-3 text-lg font-semibold text-gray-600 border-2 border-gray-200 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all">
+                <Link href="/login" onClick={() => setIsOpen(false)} className="w-full text-center py-3 text-lg font-semibold text-gray-600 border-2 border-gray-200 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all">
                     Log In
-                </button>
-                <button className="w-full py-3 text-lg font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md transition-all">
+                </Link>
+                <Link href="/register" onClick={() => setIsOpen(false)} className="w-full text-center py-3 text-lg font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md transition-all">
                     Get Started
-                </button>
+                </Link>
               </>
              ) : (
               <>
-                <Link href="/my-bookings" onClick={() => setIsOpen(false)} className="w-full text-center py-3 text-lg font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md transition-all">
-                    My Bookings
+                <Link href="/dashboard" onClick={() => setIsOpen(false)} className="w-full text-center py-3 text-lg font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md transition-all">
+                    Dashboard
                 </Link>
-                <button className="w-full py-3 text-lg font-semibold text-gray-600 border-2 border-gray-200 rounded-xl hover:border-gray-600 hover:text-black transition-all">
+                <button onClick={handleLogout} className="w-full py-3 text-lg font-semibold text-gray-600 border-2 border-gray-200 rounded-xl hover:border-gray-600 hover:text-black transition-all">
                     Log Out
                 </button>
               </>

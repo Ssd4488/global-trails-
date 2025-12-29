@@ -1,68 +1,51 @@
-'use client';
+'use client'; // <--- THIS IS CRITICAL FOR NEXT.JS
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '../lib/firebase';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  updateProfile
-} from 'firebase/auth';
+import React, { useContext, useState, useEffect } from "react";
+// Ensure this path points to your firebase config
+import { auth } from "../lib/firebase"; 
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged 
+} from "firebase/auth";
 
-const AuthContext = createContext();
+const AuthContext = React.createContext();
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Sign Up
-  function signUp(email, password) {
+  function signup(email, password) {
     return createUserWithEmailAndPassword(auth, email, password);
   }
 
-  // Log In
-  function logIn(email, password) {
+  function login(email, password) {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
-  // Log In with Google
-  function googleSignIn() {
-    const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
-  }
-
-  // Log Out
-  function logOut() {
+  function logout() {
     return signOut(auth);
   }
 
-  // Update Profile Name
-  function updateUserProfile(name) {
-    return updateProfile(auth.currentUser, {
-      displayName: name
-    });
-  }
-
-  // Listen for user state changes (Logged In vs Out)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
       setLoading(false);
     });
-    return () => unsubscribe();
+
+    return unsubscribe;
   }, []);
 
   const value = {
-    user,
-    loading,
-    signUp,
-    logIn,
-    googleSignIn,
-    logOut,
-    updateUserProfile
+    currentUser,
+    login,
+    signup,
+    logout
   };
 
   return (
@@ -70,8 +53,4 @@ export function AuthProvider({ children }) {
       {!loading && children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  return useContext(AuthContext);
 }
