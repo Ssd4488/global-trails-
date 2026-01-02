@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { updateProfile } from 'firebase/auth';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, deleteDoc, doc } from 'firebase/firestore'; // Import deleteDoc & doc
 import { db } from '../lib/firebase';
-import { LogOut, User, MapPin, Calendar, Settings, Loader2 } from 'lucide-react';
+import { LogOut, User, MapPin, Calendar, Settings, Loader2, Trash2, AlertTriangle } from 'lucide-react'; // Import Trash2
 
 export default function Dashboard() {
   const { currentUser, logout } = useAuth();
@@ -31,7 +31,7 @@ export default function Dashboard() {
     }
   }, [currentUser, router]);
 
-  // 2. Fetch User's Bookings from Firestore
+  // 2. Fetch User's Bookings
   const fetchBookings = async () => {
     if (!currentUser) return;
     try {
@@ -53,7 +53,27 @@ export default function Dashboard() {
     }
   };
 
-  // 3. Update Profile Function
+  // 3. NEW: Cancel Booking Function
+  const handleCancelBooking = async (bookingId) => {
+    // Simple browser confirmation
+    const isConfirmed = window.confirm("Are you sure you want to cancel this trip? This action cannot be undone.");
+    
+    if (!isConfirmed) return;
+
+    try {
+      // Delete from Firestore
+      await deleteDoc(doc(db, 'bookings', bookingId));
+      
+      // Update local state (remove from list immediately)
+      setBookings(prevBookings => prevBookings.filter(b => b.id !== bookingId));
+      
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      alert("Failed to cancel booking. Please try again.");
+    }
+  };
+
+  // 4. Update Profile Function
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
@@ -146,19 +166,38 @@ export default function Dashboard() {
                 ) : bookings.length > 0 ? (
                   <div className="space-y-4">
                     {bookings.map((booking) => (
-                      <div key={booking.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow flex flex-col md:flex-row justify-between gap-4">
-                        <div>
+                      <div key={booking.id} className="border border-slate-200 rounded-lg p-5 hover:shadow-md transition-shadow flex flex-col md:flex-row justify-between gap-4 bg-white">
+                        <div className="flex-1">
                           <h3 className="font-bold text-lg text-slate-900">{booking.packageTitle}</h3>
-                          <div className="flex items-center text-slate-500 text-sm mt-1">
-                            <MapPin className="h-4 w-4 mr-1" /> {booking.location || 'Global Destination'}
+                          
+                          <div className="flex items-center text-slate-500 text-sm mt-2">
+                            <MapPin className="h-4 w-4 mr-1 text-blue-500" /> {booking.location || 'Global Destination'}
                           </div>
-                          <div className="mt-2 inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-md">
+                          
+                          <div className="flex items-center text-slate-500 text-sm mt-1">
+                             <Calendar className="h-4 w-4 mr-1 text-blue-500" /> 
+                             Booked for: {booking.date ? new Date(booking.date).toLocaleDateString() : 'Date pending'}
+                          </div>
+
+                          <div className="mt-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             {booking.status || 'Confirmed'}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm text-slate-500">Booked on</p>
-                          <p className="font-medium text-slate-900">{new Date(booking.createdAt?.seconds * 1000).toLocaleDateString()}</p>
+
+                        <div className="flex flex-col justify-between items-end">
+                          <div className="text-right mb-4 md:mb-0">
+                            <p className="text-xs text-slate-400 uppercase font-semibold">Total Price</p>
+                            <p className="text-xl font-bold text-blue-600">${booking.totalPrice?.toLocaleString() || 0}</p>
+                            <p className="text-xs text-slate-400">{booking.guests} {booking.guests === 1 ? 'Guest' : 'Guests'}</p>
+                          </div>
+                          
+                          <button 
+                            onClick={() => handleCancelBooking(booking.id)}
+                            className="flex items-center text-sm text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Cancel Trip
+                          </button>
                         </div>
                       </div>
                     ))}

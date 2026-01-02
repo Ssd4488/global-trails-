@@ -4,11 +4,15 @@ import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { MapPin, Clock, Star, ArrowLeft, Check, AlertCircle } from 'lucide-react';
-import { packages } from '../../data/packages'; // Ensure this matches your data file export
+// Ensure we import correctly from your data file
+import { allPackages as packages } from '../../data/packages'; 
 import BookingModal from '../../components/BookingModal';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
+
+// A nice fallback image in case one is missing in the data
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop";
 
 export default function DestinationDetail() {
   const { id } = useParams();
@@ -18,8 +22,7 @@ export default function DestinationDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
 
-  // 1. Find the package that matches the URL ID
-  // Note: We use toString() to ensure type matching works
+  // 1. Find the package
   const pkg = packages.find((p) => p.id.toString() === id);
 
   if (!pkg) {
@@ -36,24 +39,31 @@ export default function DestinationDetail() {
   // 2. Handle "Book Now" Click
   const handleBookClick = () => {
     if (!currentUser) {
-      // If user is not logged in, force them to login
       router.push('/login');
       return;
     }
     setIsModalOpen(true);
   };
 
-  // 3. Handle the actual booking submission
+  // 3. Handle Booking Submission
   const handleBookingSubmit = async (bookingData) => {
     try {
-      // Add the booking to the 'bookings' collection in Firestore
-      await addDoc(collection(db, 'bookings'), bookingData);
+      // Safety check: Ensure no fields are undefined
+      const safeBookingData = {
+        ...bookingData,
+        packageTitle: bookingData.packageTitle || pkg.title || 'Untitled Package',
+        location: bookingData.location || pkg.location || 'Unknown Location',
+        pricePerPerson: bookingData.pricePerPerson || pkg.price || 0,
+        userId: currentUser?.uid || 'anonymous',
+        userEmail: currentUser?.email || 'unknown',
+        createdAt: new Date() // Ensure we have a date
+      };
+
+      await addDoc(collection(db, 'bookings'), safeBookingData);
       
-      // Close modal and show success message
       setIsModalOpen(false);
       setBookingSuccess(true);
       
-      // Redirect to Dashboard after 2 seconds so they can see the booking
       setTimeout(() => {
         router.push('/dashboard');
       }, 2000);
@@ -64,7 +74,7 @@ export default function DestinationDetail() {
     }
   };
 
-  // 4. Render Success Screen if booking is done
+  // 4. Render Success Screen
   if (bookingSuccess) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 animate-fade-in">
@@ -80,13 +90,14 @@ export default function DestinationDetail() {
   }
 
   // 5. Render Main Detail Page
+  // We use pkg.image || FALLBACK_IMAGE to prevent the crash
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
       {/* Hero Image */}
       <div className="relative h-[50vh] w-full">
         <Image 
-          src={pkg.image} 
-          alt={pkg.title} 
+          src={pkg.image ? pkg.image : FALLBACK_IMAGE} 
+          alt={pkg.title || 'Destination'} 
           fill 
           className="object-cover"
           priority
@@ -199,7 +210,6 @@ export default function DestinationDetail() {
         </div>
       </div>
 
-      {/* Render the Booking Modal */}
       <BookingModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
