@@ -1,4 +1,3 @@
-// src/app/lib/firebase.js
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -13,10 +12,11 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase (avoid re-initializing on hot-reload)
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Initialize Firebase (ensures we don't initialize more than once)
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+
 const db = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
 
-export { db, storage, auth };
+export { app, db, storage, auth };
