@@ -2,18 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation'; // Added useRouter
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { useAuth } from '../context/AuthContext'; // 1. Import AuthContext
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
-  
-  // 2. Use real auth state instead of local state
-  const { currentUser, logout } = useAuth(); 
-  const router = useRouter();
   
   // --- HYDRATION FIX ---
   const [isMounted, setIsMounted] = useState(false);
@@ -36,27 +30,7 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []); 
 
-  // 3. Handle Logout Logic
-  const handleLogout = async () => {
-    try {
-      await logout();
-      setIsOpen(false); // Close mobile menu if open
-      router.push('/login'); // Optional: Redirect to login after logout
-    } catch (error) {
-      console.error("Failed to log out", error);
-    }
-  };
-
   const isActive = (path) => pathname === path;
-
-  const destinationCategories = [
-    { name: 'Beach Escapes', icon: '🌊', href: '/destinations?experience=Beach' },
-    { name: 'Mountain Treks', icon: '🏔️', href: '/destinations?experience=Mountain' },
-    { name: 'City Breaks', icon: '🏙️', href: '/destinations?experience=City+Break' },
-    { name: 'Cultural Journeys', icon: '🏛️', href: '/destinations?experience=Cultural' },
-    { name: 'Honeymoon Specials', icon: '💍', href: '/destinations?mood=Romantic' },
-    { name: 'Solo Adventures', icon: '🎒', href: '/destinations?mood=Solo+Adventure' },
-  ];
 
   const navLinkHoverClass = `relative text-[17px] font-medium px-3 py-3 transition-all duration-300 group transform hover:-translate-y-0.5 after:absolute after:bottom-2 after:left-0 after:h-[2px] after:w-full after:origin-center after:scale-x-0 after:transition-transform after:duration-300 after:ease-out group-hover:after:scale-x-100`;
 
@@ -88,7 +62,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
 
-          {/* --- Logo --- */}
+          {/* --- Logo (Left Side) --- */}
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="flex items-center gap-2 group">
               <span className={`font-extrabold tracking-tight transition-all duration-500 ${logoClasses}`}>
@@ -97,109 +71,14 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* --- Desktop Navigation --- */}
-          <div className="hidden md:flex items-center space-x-1">
-            <div className="flex items-center space-x-6 mr-8 h-full">
+          {/* --- Desktop Navigation (Right Side) --- */}
+          <div className="hidden md:flex items-center space-x-1 ml-auto">
+            <div className="flex items-center space-x-6 h-full">
               <Link href="/" className={linkClasses('/')}>Home</Link>
-
-              {/* === MEGA MENU WRAPPER === */}
-              <div
-                className="relative h-full flex items-center"
-                onMouseEnter={() => setIsMegaMenuOpen(true)}
-                onMouseLeave={() => setIsMegaMenuOpen(false)}
-              >
-                 <Link href="/destinations" className={`${linkClasses('/destinations')} flex items-center gap-1`}>
-                  Destinations
-                  <svg className={`w-4 h-4 transition-transform duration-300 ${isMegaMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                </Link>
-
-                {/* === THE MEGA MENU === */}
-                <div
-                    className={`absolute top-full left-1/2 -translate-x-1/2 pt-6 w-[600px] transition-all duration-300 origin-top
-                    ${isMegaMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}
-                >
-                    <div className="bg-white rounded-2xl shadow-2xl p-6 border border-gray-100 grid grid-cols-3 gap-6 overflow-hidden">
-                        <div className="col-span-2 space-y-4">
-                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Explore by Interest</h3>
-                            <div className="grid grid-cols-2 gap-2">
-                                {destinationCategories.map((cat) => (
-                                    <Link
-                                        key={cat.name}
-                                        href={cat.href}
-                                        onClick={() => setIsMegaMenuOpen(false)}
-                                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition-colors group"
-                                    >
-                                        <span className="text-2xl">{cat.icon}</span>
-                                        <span className="text-gray-700 font-medium group-hover:text-blue-600">{cat.name}</span>
-                                    </Link>
-                                ))}
-                            </div>
-                             <Link href="/destinations" onClick={() => setIsMegaMenuOpen(false)} className="block mt-4 text-center text-blue-600 font-semibold hover:underline">
-                                View All Packages &rarr;
-                            </Link>
-                        </div>
-                        <div className="relative h-full min-h-[250px] rounded-xl overflow-hidden group">
-                             <Image
-                                src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=2070&auto=format&fit=crop"
-                                alt="Featured Destination"
-                                layout="fill"
-                                objectFit="cover"
-                                className="transition-transform duration-700 group-hover:scale-110"
-                             />
-                             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-4">
-                                 <div className="text-white">
-                                     <p className="text-xs font-bold text-orange-400 uppercase mb-1">Trending Now</p>
-                                     <p className="font-bold text-lg leading-tight">Experience Cherry Blossoms in Japan</p>
-                                 </div>
-                             </div>
-                        </div>
-                    </div>
-                </div>
-                {/* === END MEGA MENU === */}
-              </div>
-
+              <Link href="/destinations" className={linkClasses('/destinations')}>Destinations</Link>
               <Link href="/about" className={linkClasses('/about')}>About Us</Link>
               <Link href="/contact" className={linkClasses('/contact')}>Contact</Link>
             </div>
-
-            {/* === AUTH LOGIC === */}
-            <div className="flex items-center gap-4">
-              {!currentUser ? (
-                // --- LOGGED-OUT STATE ---
-                <>
-                  <Link href="/login" className={`${linkClasses('/login')} ${isMounted && isScrolled ? 'text-blue-100' : 'text-gray-600'}`}>
-                    Log In
-                  </Link>
-                  <Link href="/register" className={`px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5
-                      ${isMounted && isScrolled
-                        ? 'bg-white text-blue-600 hover:bg-gray-100'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`
-                  }>
-                    Get Started
-                  </Link>
-                </>
-              ) : (
-                // --- LOGGED-IN STATE ---
-                <>
-                  <Link
-                    href="/dashboard"
-                    className={linkClasses('/dashboard')}
-                  >
-                    Dashboard
-                  </Link>
-                  <button 
-                    onClick={handleLogout}
-                    className={`p-2 rounded-full transition-all duration-300 transform hover:scale-110
-                    ${isMounted && isScrolled ? 'bg-white/20 hover:bg-white/30' : 'bg-gray-100 hover:bg-gray-200'}`
-                  }>
-                    <svg className={`w-6 h-6 ${isMounted && isScrolled ? 'text-white' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                  </button>
-                </>
-              )}
-            </div>
-            {/* === END AUTH LOGIC === */}
-
           </div>
 
           {/* --- Mobile Menu Hamburger --- */}
@@ -228,29 +107,6 @@ export default function Navbar() {
           <Link href="/destinations" onClick={() => setIsOpen(false)} className={`text-xl font-medium py-3 px-4 rounded-xl transition-all ${isActive('/destinations') ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-gray-50'}`}>Destinations</Link>
           <Link href="/about" onClick={() => setIsOpen(false)} className={`text-xl font-medium py-3 px-4 rounded-xl transition-all ${isActive('/about') ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-gray-50'}`}>About Us</Link>
           <Link href="/contact" onClick={() => setIsOpen(false)} className={`text-xl font-medium py-3 px-4 rounded-xl transition-all ${isActive('/contact') ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-gray-50'}`}>Contact</Link>
-
-          {/* Mobile Auth */}
-          <div className="pt-6 flex flex-col gap-3">
-             {!currentUser ? (
-              <>
-                <Link href="/login" onClick={() => setIsOpen(false)} className="w-full text-center py-3 text-lg font-semibold text-gray-600 border-2 border-gray-200 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all">
-                    Log In
-                </Link>
-                <Link href="/register" onClick={() => setIsOpen(false)} className="w-full text-center py-3 text-lg font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md transition-all">
-                    Get Started
-                </Link>
-              </>
-             ) : (
-              <>
-                <Link href="/dashboard" onClick={() => setIsOpen(false)} className="w-full text-center py-3 text-lg font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md transition-all">
-                    Dashboard
-                </Link>
-                <button onClick={handleLogout} className="w-full py-3 text-lg font-semibold text-gray-600 border-2 border-gray-200 rounded-xl hover:border-gray-600 hover:text-black transition-all">
-                    Log Out
-                </button>
-              </>
-             )}
-          </div>
         </div>
       </div>
     </nav>

@@ -1,222 +1,171 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { MapPin, Clock, Star, ArrowLeft, Check, AlertCircle } from 'lucide-react';
-// Ensure we import correctly from your data file
-import { allPackages as packages } from '../../data/packages'; 
-import BookingModal from '../../components/BookingModal';
-import { useAuth } from '../../context/AuthContext';
-import { db } from '../../lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
-
-// A nice fallback image in case one is missing in the data
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop";
+import Link from 'next/link';
+import { 
+  Calendar, 
+  Star, 
+  CheckCircle2, 
+  ArrowLeft, 
+  Clock,
+  MapPin,
+  Compass
+} from 'lucide-react';
+// Correct import to reach your data file
+import { packages } from '../../data/packages';
 
 export default function DestinationDetail() {
-  const { id } = useParams();
+  const params = useParams();
   const router = useRouter();
-  const { currentUser } = useAuth();
-  
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const id = params?.id;
 
-  // 1. Find the package
-  const pkg = packages.find((p) => p.id.toString() === id);
+  // Find the package data
+  const pkg = packages.find((p) => p.id === id);
 
+  // Error handling if ID doesn't match
   if (!pkg) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
-        <h1 className="text-2xl text-gray-400">Destination not found</h1>
-        <button onClick={() => router.push('/destinations')} className="text-blue-600 hover:underline">
-          Back to all destinations
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+        <h2 className="text-3xl font-black text-slate-900 mb-4">Destination Not Found</h2>
+        <button 
+          onClick={() => router.push('/destinations')}
+          className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold"
+        >
+          Back to Destinations
         </button>
       </div>
     );
   }
 
-  // 2. Handle "Book Now" Click
-  const handleBookClick = () => {
-    if (!currentUser) {
-      router.push('/login');
-      return;
-    }
-    setIsModalOpen(true);
-  };
-
-  // 3. Handle Booking Submission
-  const handleBookingSubmit = async (bookingData) => {
-    try {
-      // Safety check: Ensure no fields are undefined
-      const safeBookingData = {
-        ...bookingData,
-        packageTitle: bookingData.packageTitle || pkg.title || 'Untitled Package',
-        location: bookingData.location || pkg.location || 'Unknown Location',
-        pricePerPerson: bookingData.pricePerPerson || pkg.price || 0,
-        userId: currentUser?.uid || 'anonymous',
-        userEmail: currentUser?.email || 'unknown',
-        createdAt: new Date() // Ensure we have a date
-      };
-
-      await addDoc(collection(db, 'bookings'), safeBookingData);
-      
-      setIsModalOpen(false);
-      setBookingSuccess(true);
-      
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 2000);
-      
-    } catch (error) {
-      console.error("Error saving booking:", error);
-      alert("Failed to save booking. Please try again.");
-    }
-  };
-
-  // 4. Render Success Screen
-  if (bookingSuccess) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 animate-fade-in">
-        <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm mx-4">
-          <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-            <Check size={32} />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
-          <p className="text-gray-600">Redirecting to your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 5. Render Main Detail Page
-  // We use pkg.image || FALLBACK_IMAGE to prevent the crash
   return (
-    <div className="min-h-screen bg-slate-50 pb-12">
-      {/* Hero Image */}
-      <div className="relative h-[50vh] w-full">
-        <Image 
-          src={pkg.image ? pkg.image : FALLBACK_IMAGE} 
-          alt={pkg.title || 'Destination'} 
-          fill 
+    <div className="bg-white min-h-screen pb-20 font-sans text-slate-900">
+      
+      {/* --- HERO SECTION --- */}
+      <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
+        <Image
+          src={pkg.image}
+          alt={pkg.title}
+          fill
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
         
-        <button 
-          onClick={() => router.back()}
-          className="absolute top-6 left-6 bg-white/20 backdrop-blur-md p-3 rounded-full text-white hover:bg-white/30 transition-all z-10"
-        >
-          <ArrowLeft size={24} />
-        </button>
-
-        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-8">
-          <div className="max-w-7xl mx-auto">
-             <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium mb-3 inline-block shadow-sm">
-               {pkg.category || 'Adventure'}
-             </span>
-             <h1 className="text-4xl md:text-6xl font-bold text-white mb-2 shadow-sm">{pkg.title}</h1>
-             <div className="flex items-center text-gray-200 gap-4">
-               <span className="flex items-center gap-1"><MapPin size={18} /> {pkg.location}</span>
-               <span className="flex items-center gap-1"><Clock size={18} /> {pkg.duration || '5 Days'}</span>
-               <span className="flex items-center gap-1 text-yellow-400"><Star size={18} fill="currentColor" /> {pkg.rating || 4.8}</span>
-             </div>
+        <div className="absolute inset-0 flex flex-col justify-between p-6 md:p-12">
+          <button 
+            onClick={() => router.back()}
+            className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white hover:bg-white/40 transition-all"
+          >
+            <ArrowLeft size={24} />
+          </button>
+          
+          <div className="max-w-4xl">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                {pkg.category}
+              </span>
+              <span className="flex items-center gap-1 text-white text-sm font-bold">
+                <Star size={16} className="text-orange-400 fill-orange-400" /> {pkg.rating}
+              </span>
+            </div>
+            <h1 className="text-4xl md:text-8xl font-black text-white tracking-tighter leading-[0.9]">
+              {pkg.title}
+            </h1>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-8">
-          <section className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-            <h2 className="text-2xl font-bold mb-4">Overview</h2>
-            <p className="text-gray-600 leading-relaxed text-lg">{pkg.description}</p>
-          </section>
-
-          <section className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-            <h2 className="text-2xl font-bold mb-6">Itinerary Highlights</h2>
-            <div className="space-y-6">
-               <div className="flex gap-4 group">
-                 <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">1</div>
-                 <div>
-                   <h3 className="font-bold text-lg">Arrival & Welcome</h3>
-                   <p className="text-gray-500">Arrive at the destination and transfer to your hotel. Welcome dinner included.</p>
-                 </div>
-               </div>
-               <div className="flex gap-4 group">
-                 <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">2</div>
-                 <div>
-                   <h3 className="font-bold text-lg">Guided Exploration</h3>
-                   <p className="text-gray-500">Full day guided tour of major landmarks and hidden local gems.</p>
-                 </div>
-               </div>
-               <div className="flex gap-4 group">
-                 <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">3</div>
-                 <div>
-                   <h3 className="font-bold text-lg">Leisure & Departure</h3>
-                   <p className="text-gray-500">Morning at leisure for shopping or relaxation before transfer to airport.</p>
-                 </div>
-               </div>
+      {/* --- QUICK INFO BAR --- */}
+      <div className="container mx-auto px-4 -mt-10 relative z-10">
+        <div className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</p>
+            <div className="flex items-center gap-2 text-slate-900 font-bold italic">
+              <Calendar size={18} className="text-blue-600" /> {pkg.duration}
             </div>
-          </section>
-        </div>
-
-        {/* Sidebar / Booking Card */}
-        <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 sticky top-24">
-            <div className="flex justify-between items-end mb-6">
-               <div>
-                 <span className="text-gray-500">Price per person</span>
-                 <div className="text-3xl font-bold text-blue-600">${pkg.price}</div>
-               </div>
-               <div className="flex gap-1 text-sm text-gray-500">
-                 <Star className="text-yellow-400" size={16} fill="currentColor" />
-                 <span>{pkg.rating || 4.8} ({pkg.reviews || 120} reviews)</span>
-               </div>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Experience</p>
+            <div className="flex items-center gap-2 text-slate-900 font-bold italic">
+              <Compass size={18} className="text-blue-600" /> {pkg.experience}
             </div>
-
-            <hr className="border-gray-100 mb-6" />
-
-            <div className="space-y-4 mb-8">
-              <div className="flex items-center gap-3 text-gray-600">
-                <Check className="text-green-500" size={20} />
-                <span>Free cancellation up to 24h</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-600">
-                <Check className="text-green-500" size={20} />
-                <span>Instant confirmation</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-600">
-                <Check className="text-green-500" size={20} />
-                <span>Expert local guide</span>
-              </div>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Style</p>
+            <div className="flex items-center gap-2 text-slate-900 font-bold italic">
+              <Clock size={18} className="text-blue-600" /> {pkg.mood}
             </div>
-            
-            <button 
-              onClick={handleBookClick}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-xl hover:shadow-blue-500/30 transform hover:-translate-y-1"
+          </div>
+          <div className="flex items-center justify-end">
+            <Link 
+              href="/contact"
+              className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all"
             >
               Book Now
-            </button>
-            
-            {!currentUser && (
-               <p className="text-xs text-center text-gray-400 mt-3 flex items-center justify-center gap-1">
-                 <AlertCircle size={12} />
-                 You need to login to book
-               </p>
-            )}
+            </Link>
           </div>
         </div>
       </div>
 
-      <BookingModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-        packageData={pkg}
-        onSubmit={handleBookingSubmit}
-        currentUser={currentUser}
-      />
+      <div className="container mx-auto px-4 py-20 grid grid-cols-1 lg:grid-cols-12 gap-16">
+        
+        {/* --- LEFT COLUMN: ITINERARY --- */}
+        <div className="lg:col-span-8 space-y-20">
+          
+          <section>
+            <h2 className="text-3xl font-black mb-8 border-l-4 border-blue-600 pl-6">Trip Overview</h2>
+            <p className="text-xl text-slate-600 leading-relaxed font-medium italic">
+              "{pkg.description}" 
+            </p>
+          </section>
+
+          <section>
+            <h3 className="text-3xl font-black mb-12">Day-by-Day Itinerary</h3>
+            <div className="space-y-12 relative before:absolute before:left-6 before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-100">
+              {pkg.itinerary.map((day, i) => (
+                <div key={i} className="relative pl-16 group">
+                  <div className="absolute left-0 top-0 w-12 h-12 bg-white border-4 border-slate-50 rounded-2xl flex items-center justify-center font-black text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-md z-10">
+                    {day.day}
+                  </div>
+                  <div className="bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100 group-hover:border-blue-500 transition-all">
+                    <h4 className="text-xl font-bold mb-3">{day.title}</h4>
+                    <p className="text-slate-600 leading-relaxed">{day.details}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* --- RIGHT COLUMN: SIDEBAR --- */}
+        <div className="lg:col-span-4 space-y-8">
+          <div className="bg-slate-900 text-white p-10 rounded-[3rem] sticky top-24 shadow-2xl">
+            <h3 className="text-2xl font-bold mb-8">What's Included</h3>
+            <ul className="space-y-6 mb-10">
+              {pkg.includes.map((item, i) => (
+                <li key={i} className="flex items-start gap-4">
+                  <CheckCircle2 size={20} className="text-blue-500 flex-shrink-0 mt-1" />
+                  <span className="text-slate-300 font-medium">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="pt-8 border-t border-white/10 text-center">
+              <p className="text-slate-400 text-sm mb-8 italic">
+                Focusing on comfort, safety, authenticity, and value.
+              </p>
+              <Link 
+                href="/contact" 
+                className="block w-full py-5 bg-[#ff7f32] text-white font-black uppercase tracking-widest rounded-2xl hover:bg-orange-600 transition-all"
+              >
+                Inquire Now
+              </Link>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

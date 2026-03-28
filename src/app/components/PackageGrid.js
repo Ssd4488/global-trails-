@@ -1,61 +1,45 @@
 'use client';
 
-import { useState } from 'react';
-import PackageCard from './PackageCard';
-import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Calendar, Star, ArrowRight } from 'lucide-react';
 
-const ITEMS_PER_PAGE = 6;
-
-// This component now receives the packages to display as a prop
-export default function PackageGrid({ packages, onPackageQuickView }) {
-  const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
-
-  const loadMore = () => {
-    setVisibleItems(prev => prev + ITEMS_PER_PAGE);
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-  };
-
+export default function PackageCard({ pkg }) {
   return (
-    <div className="w-full">
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        key={packages.length} // Add key to re-trigger animation on filter change
-      >
-        {packages.slice(0, visibleItems).map((pkg) => (
-          <PackageCard 
-            key={pkg.id} 
-            {...pkg} 
-            onQuickViewClick={() => onPackageQuickView(pkg)}
+    /* We use a fixed width (w-[250px]) to create the Netflix "thumbnail" look */
+    <div className="flex-shrink-0 w-[250px] md:w-[280px] group cursor-pointer snap-start">
+      <Link href={`/destinations/${pkg.id}`}>
+        <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3 shadow-md">
+          <Image
+            src={pkg.image || pkg.imageUrl}
+            alt={pkg.title || pkg.destination}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            sizes="280px"
           />
-        ))}
-      </motion.div>
-
-      {/* Show a message if no packages match the filter */}
-      {packages.length === 0 && (
-        <div className="text-center py-16">
-          <h3 className="text-2xl font-semibold text-gray-700">No Packages Found</h3>
-          <p className="text-gray-500 mt-2">Try adjusting your filters to find your perfect trip.</p>
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+          
+          <div className="absolute bottom-4 left-4 right-4 text-white">
+            <h3 className="font-bold text-lg leading-tight group-hover:text-blue-400 transition-colors">
+              {pkg.title || pkg.destination}
+            </h3>
+          </div>
         </div>
-      )}
-
-      {visibleItems < packages.length && (
-        <div className="text-center mt-12">
-          <button 
-            onClick={loadMore}
-            className="bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
-          >
-            Load More
-          </button>
+      </Link>
+      
+      {/* Modern Info Bar: No prices, just clean icons */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <Calendar size={14} className="text-blue-500" /> {pkg.duration}
+          </span>
+          <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <Star size={14} className="text-orange-500 fill-orange-500" /> {pkg.rating}
+          </span>
         </div>
-      )}
+        <ArrowRight size={16} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
+      </div>
     </div>
   );
 }
-

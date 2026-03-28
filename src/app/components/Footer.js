@@ -1,9 +1,8 @@
 import Link from 'next/link';
 
-// --- Social Media Icons ---
 const SocialIcon = ({ path }) => (
   <svg
-    className="w-5 h-5 text-gray-400 hover:text-[#ff7f32] transition-colors cursor-pointer"
+    className="w-7 h-7 text-gray-400 hover:text-[#ff7f32] transition-all transform hover:scale-110 cursor-pointer"
     fill="currentColor"
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
@@ -21,23 +20,20 @@ const socialPaths = {
 
 export default function Footer() {
   return (
-    // Using the deep dark blue from your brand as the background
     <footer className="bg-[#0d1b2a] text-gray-300 pt-16 pb-8 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Top Area: 4 Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-12 mb-16">
           
           {/* Column 1: Brand Info */}
-          <div className="space-y-6">
+          <div className="col-span-2 lg:col-span-1 space-y-6">
              <h2 className="text-3xl font-extrabold text-white tracking-tight">
               Globe<span className="text-[#ff7f32]">Trails</span>.
             </h2>
-            <p className="text-base leading-relaxed opacity-80">
-              Curating unforgettable journeys for the modern explorer. Discover the world with confidence and style.
+            <p className="text-base leading-relaxed opacity-80 max-w-sm">
+              At GLOBETRAIL TRAVELS, we believe travel is more than just visiting new places — it’s about creating stories that stay with you for a lifetime.
             </p>
-            {/* Social Icons */}
-            <div className="flex space-x-5 pt-2">
+            <div className="flex space-x-6 pt-2">
               <SocialIcon path={socialPaths.facebook} />
               <SocialIcon path={socialPaths.twitter} />
               <SocialIcon path={socialPaths.instagram} />
@@ -46,41 +42,24 @@ export default function Footer() {
           </div>
 
           {/* Column 2: Company Links */}
-          <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Company</h3>
+          <div className="col-span-1">
+            <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6 border-b border-white/10 pb-2 w-fit">Company</h3>
             <ul className="space-y-4">
               <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Careers</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Press</Link></li>
               <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>
           </div>
 
           {/* Column 3: Support Links */}
-          <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Support</h3>
+          <div className="col-span-1">
+            <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6 border-b border-white/10 pb-2 w-fit">Support</h3>
             <ul className="space-y-4">
               <li><Link href="#" className="hover:text-white transition-colors">Help Center</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Safety Information</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Cancellation Options</Link></li>
+              {/* UPDATED: Cancellation Options to Refund Policy */}
+              <li><Link href="/refund-policy" className="hover:text-white transition-colors">Refund Policy</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Report a Concern</Link></li>
             </ul>
-          </div>
-
-          {/* Column 4: Newsletter */}
-          <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Stay Updated</h3>
-            <p className="text-sm mb-4 opacity-80">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
-            <form className="flex flex-col space-y-3">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-[#ff7f32] transition-colors text-white placeholder:text-gray-500"
-              />
-              <button className="px-4 py-3 bg-[#ff7f32] text-white font-bold rounded-lg hover:bg-[#e66e25] transition-colors shadow-md">
-                Subscribe
-              </button>
-            </form>
           </div>
 
         </div>
@@ -89,9 +68,10 @@ export default function Footer() {
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm opacity-60">
           <p>&copy; {new Date().getFullYear()} GlobeTrails Inc. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="#" className="hover:text-white transition-colors">Sitemap</Link>
+            <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link>
+            {/* UPDATED: Sitemap to Legal Disclaimer */}
+            <Link href="/legal-disclaimer" className="hover:text-white transition-colors">Legal Disclaimer</Link>
           </div>
         </div>
 

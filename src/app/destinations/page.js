@@ -1,104 +1,55 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { getAllPackages } from '../lib/getData'; // UPDATED: Fetch from Firebase
-import FilterSidebar from '../components/FilterSidebar';
-import PackageGrid from '../components/PackageGrid';
+import { packages } from '../data/packages';
+import PackageCard from '../components/PackageCard';
 import DestinationsHero from '../components/DestinationsHero';
-import SortingBar from '../components/SortingBar';
-import QuickViewModal from '../components/QuickViewModal';
 
 export default function DestinationsPage() {
-  const [allPackages, setAllPackages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  
-  const [filters, setFilters] = useState({ experience: [], mood: [] });
-  const [activeSort, setActiveSort] = useState("✨ Featured");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState(null);
-
-  // --- NEW: Fetch Data from Firebase ---
-  useEffect(() => {
-    async function loadPackages() {
-      setLoading(true);
-      try {
-        const data = await getAllPackages();
-        setAllPackages(data);
-      } catch (error) {
-        console.error("Failed to load packages:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadPackages();
-  }, []);
-
-  const handleFilterChange = (filterName, value) => {
-    setFilters(prev => ({ ...prev, [filterName]: value }));
-  };
-
-  const filteredAndSortedPackages = useMemo(() => {
-    let packages = [...allPackages];
-
-    if (filters.experience && filters.experience.length > 0) {
-      packages = packages.filter(p => filters.experience.includes(p.experience));
-    }
-    if (filters.mood && filters.mood.length > 0) {
-      packages = packages.filter(p => filters.mood.includes(p.mood));
-    }
-
-    if (activeSort === "💸 Price (Low-High)") {
-      packages.sort((a, b) => a.price - b.price);
-    } else if (activeSort === "🌟 Top Rated") {
-      packages.sort((a, b) => b.rating - a.rating);
-    }
-
-    return packages;
-  }, [allPackages, filters, activeSort]);
-
-  const handleOpenModal = (pkg) => {
-    setSelectedPackage(pkg);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedPackage(null);
-  };
+  const rows = [
+    { title: "Trending Now", category: "All" },
+    { title: "Domestic Wonders", category: "India" },
+    { title: "International Escapes", category: "International" },
+    { title: "Beach Paradises", experience: "Beach" },
+    { title: "Mountain Treks", experience: "Mountain" }
+  ];
 
   return (
-    <>
+    <div className="bg-white min-h-screen pb-20 font-sans">
       <DestinationsHero />
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex flex-col lg:flex-row gap-12">
-          <FilterSidebar filters={filters} onFilterChange={handleFilterChange} />
-          
-          <div className="flex-grow">
-            <SortingBar 
-              activeSort={activeSort}
-              onSortChange={setActiveSort}
-              resultCount={filteredAndSortedPackages.length}
-            />
-            
-            {loading ? (
-               // Simple loading skeleton for grid
-               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                 {[...Array(6)].map((_, i) => (
-                   <div key={i} className="h-96 bg-gray-100 rounded-2xl animate-pulse"></div>
-                 ))}
-               </div>
-            ) : (
-              <PackageGrid 
-                packages={filteredAndSortedPackages} 
-                onPackageQuickView={handleOpenModal} 
-              />
-            )}
-          </div>
-        </div>
-      </div>
+      <div className="pt-10 space-y-16">
+        {rows.map((row) => (
+          <section key={row.title} className="relative group">
+            {/* Row Title */}
+            <div className="container mx-auto px-6 mb-6 flex justify-between items-end">
+              <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">
+                {row.title}
+              </h2>
+              <button className="text-blue-600 font-bold text-sm hover:underline">
+                Explore All
+              </button>
+            </div>
 
-      <QuickViewModal pkg={selectedPackage} onClose={handleCloseModal} />
-    </>
+            {/* The Netflix-Style Scroll Container */}
+            <div className="relative">
+              <div className="flex gap-6 overflow-x-auto px-6 md:px-12 pb-6 no-scrollbar snap-x scroll-smooth">
+                {packages
+                  .filter(p => 
+                    row.category === "All" || 
+                    p.category === row.category || 
+                    p.experience === row.experience
+                  )
+                  .map((pkg) => (
+                    <PackageCard key={pkg.id} pkg={pkg} />
+                  ))}
+                
+                {/* Spacer at the end of the row */}
+                <div className="flex-shrink-0 w-6 md:w-12 h-full" />
+              </div>
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
   );
 }
