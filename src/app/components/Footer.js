@@ -28,7 +28,7 @@ export default function Footer() {
           {/* Column 1: Brand Info */}
           <div className="col-span-2 lg:col-span-1 space-y-6">
              <h2 className="text-3xl font-extrabold text-white tracking-tight">
-              Globe<span className="text-[#ff7f32]">Trails</span>.
+              Globe<span className="text-[#ff7f32]"> Trail</span>.
             </h2>
             <p className="text-base leading-relaxed opacity-80 max-w-sm">
               At GLOBETRAIL TRAVELS, we believe travel is more than just visiting new places — it’s about creating stories that stay with you for a lifetime.
@@ -66,7 +66,7 @@ export default function Footer() {
 
         {/* Bottom Bar: Copyright & Legal */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm opacity-60">
-          <p>&copy; {new Date().getFullYear()} GlobeTrails Inc. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Globe Trails Inc. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link>

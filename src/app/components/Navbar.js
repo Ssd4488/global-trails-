@@ -66,7 +66,7 @@ export default function Navbar() {
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="flex items-center gap-2 group">
               <span className={`font-extrabold tracking-tight transition-all duration-500 ${logoClasses}`}>
-                GlobeTrails<span className={logoDotClasses}>.</span>
+                Globe Trail Travels  <span className={logoDotClasses}>.</span>
               </span>
             </Link>
           </div>

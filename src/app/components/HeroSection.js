@@ -12,7 +12,7 @@ export default function HeroSection() {
       {/* 1. The Background Image (Using a guaranteed premium Unsplash link) */}
       <Image
         src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070" 
-        alt="GlobeTrails Background"
+        alt="Globe Trails Background"
         fill
         priority
         className="object-cover object-center"
@@ -43,7 +43,7 @@ export default function HeroSection() {
           {/* Massive Two-Tone Headline */}
           <h1 className="text-7xl md:text-[8rem] lg:text-[10rem] font-black tracking-tighter leading-none drop-shadow-2xl">
             <span className="text-white">GLOBE</span>
-            <span className="text-blue-500">TRAIL.</span>
+            <span className="text-blue-500"> TRAIL.</span>
           </h1>
 
           {/* Subheadline */}
