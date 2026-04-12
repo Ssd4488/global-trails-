@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +10,8 @@ import { db } from '../lib/firebase';
 import { LogOut, User, MapPin, Calendar, Settings, Loader2, Trash2, AlertTriangle } from 'lucide-react'; // Import Trash2
 
 export default function Dashboard() {
-  const { currentUser, logout } = useAuth();
+  // The "|| {}" safely prevents the crash during Vercel's build!
+  const { currentUser, logout } = useAuth() || {}; 
   const router = useRouter();
   
   const [activeTab, setActiveTab] = useState('bookings');
