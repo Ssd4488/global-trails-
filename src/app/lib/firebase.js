@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // 1. Added the import
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,15 +15,16 @@ const firebaseConfig = {
 let app;
 let auth;
 let db;
+let storage; // 2. Declared the variable
 
-// The Uncrashable Shield: 
-// This forces Next.js to ignore the "invalid-api-key" error and finish the build.
+// The Uncrashable Shield
 try {
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   auth = getAuth(app);
   db = getFirestore(app);
+  storage = getStorage(app); // 3. Initialized it
 } catch (error) {
   console.log("Firebase Error Caught! Safely skipping initialization during Vercel build...");
 }
 
-export { app, auth, db };
+export { app, auth, db, storage }; // 4. Exported it so page.js can use it
