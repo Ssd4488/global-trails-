@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const taglines = [
   "Find Your Next Escape.",
@@ -9,6 +10,12 @@ const taglines = [
 
 export default function DestinationsHero() {
   const [tagline, setTagline] = useState(taglines[0]);
+  
+  // 1. New state to hold what the user types
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // 2. Initialize the router
+  const router = useRouter();
 
   useEffect(() => {
     let i = 0;
@@ -19,26 +26,48 @@ export default function DestinationsHero() {
     return () => clearInterval(interval);
   }, []);
 
+  // 3. The function that runs when they press Enter or click Search
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim() !== '') {
+      // Sends them to the new search page with their query
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+    }
+  };
+
   return (
     <div 
       className="relative h-80 bg-cover bg-center flex items-center justify-center text-white"
       style={{ backgroundImage: "url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1935&auto=format&fit=crop')" }}
     >
       <div className="absolute inset-0 bg-black/60"></div>
-      <div className="relative z-10 text-center max-w-2xl mx-auto px-4">
+      <div className="relative z-10 text-center max-w-2xl mx-auto px-4 w-full">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Where to next?</h1>
-        <div className="relative">
-          {/* UPDATED: Added bg-white for visibility */}
+        
+        {/* 4. Wrapped the input in a form to handle the submission */}
+        <form onSubmit={handleSearch} className="relative w-full max-w-lg mx-auto">
           <input 
             type="text" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search for a city, destination or tour..."
-            className="w-full pl-12 pr-4 py-4 border-0 rounded-full shadow-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-12 pr-28 py-4 border-0 rounded-full shadow-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <svg className="w-6 h-6 text-gray-400 absolute top-1/2 left-4 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </div>
+          <svg className="w-6 h-6 text-gray-400 absolute top-1/2 left-4 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          
+          {/* 5. Added a clean Submit button inside the input bar */}
+          <button 
+            type="submit" 
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 transition-colors"
+          >
+            Search
+          </button>
+        </form>
+
         <p className="mt-4 text-lg opacity-80 h-6 transition-opacity duration-500">{tagline}</p>
       </div>
     </div>
   );
 }
-
