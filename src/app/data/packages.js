@@ -29,7 +29,7 @@ export const packages = [
   {
     id: "ind-02",
     title: "Royal Rajasthan Heritage Tour",
-    image: "/images/destinations/jaipur-rajasthan.jpg",
+    image: "/images/destinations/royal-rajasthan-heritage.jpg",
     category: "India",
     experience: "Cultural",
     duration: "6 Days / 5 Nights",
