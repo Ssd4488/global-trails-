@@ -5,13 +5,17 @@ import { getFirestore } from "firebase/firestore";
 
 // The Magic Fix: We provide a fake key that starts with "AIza" so Firebase 
 // stays completely quiet during Vercel's build process.
+// A mathematically valid fake key for the Vercel Build Bot
+const dummyKey = "AIzaSyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"; 
+
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyMockKeyForVercelBuildDoNotUse123",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "mock.firebaseapp.com",
+  // If the real key is missing during build, use the perfectly formatted dummy key
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || dummyKey,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "mock-app.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "mock-project",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "mock.appspot.com",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:mock"
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "mock-app.appspot.com",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789012",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789012:web:abcdef123456"
 };
 
 // Standard Initialization
