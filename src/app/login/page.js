@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Changed from react-router-dom
 import Link from 'next/link'; // Changed from react-router-dom
@@ -12,7 +14,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { login } = useAuth();
+const { login } = useAuth() || {};
   const router = useRouter(); // Initialize router
 
   const handleSubmit = async (e) => {
