@@ -2,9 +2,7 @@
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
-import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
-  getFirestore, 
   collection, 
   onSnapshot, 
   doc, 
@@ -14,45 +12,23 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { 
-  getAuth, 
   onAuthStateChanged, 
   signInAnonymously, 
   signInWithCustomToken 
 } from 'firebase/auth';
 import { 
-  getStorage, 
   ref, 
   uploadBytesResumable, 
   getDownloadURL 
 } from 'firebase/storage';
 import { 
-  Plus, 
-  Pencil, 
-  Trash2, 
-  X, 
-  Upload, 
-  CheckCircle, 
-  Loader2, 
-  MapPin, 
-  Package,
-  ChevronRight,
-  AlertCircle,
-  LogOut,
-  Globe,
-  LayoutDashboard
+  Plus, Pencil, Trash2, X, Upload, CheckCircle, Loader2, MapPin, Package,
+  ChevronRight, AlertCircle, LogOut, Globe, LayoutDashboard
 } from 'lucide-react';
 
-// --- Firebase Configuration & Initialization ---
-// We use a safe check for the configuration variable to prevent crashes if it's missing
-const firebaseConfig = typeof __firebase_config !== 'undefined' 
-  ? JSON.parse(__firebase_config) 
-  : {};
-
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+// ✨ THIS IS THE FIX: We import the uncrashable instances we created!
+// (If your lib folder is somewhere else, adjust this path to match)
+import { auth, db, storage } from '@/app/lib/firebase';
 
 /**
  * AdminDashboard - Unified Content Management Hub
@@ -70,6 +46,9 @@ export default function App() {
   // Form State
   const [formData, setFormData] = useState({ name: '', description: '', price: '', imageFile: null, imageUrl: '' });
   const [editingId, setEditingId] = useState(null);
+
+  // ✨ Safe fallback for appId moved INSIDE the component
+  const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
   // --- 1. Authentication Lifecycle ---
   useEffect(() => {
@@ -99,8 +78,8 @@ export default function App() {
   useEffect(() => {
     if (!user) return;
 
-    // Following strict path Rule 1 for collaborative data
-    const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', activeTab);
+    // ✨ Updated to use currentAppId
+    const collectionRef = collection(db, 'artifacts', currentAppId, 'public', 'data', activeTab);
     
     const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
       const fetchedItems = snapshot.docs.map(doc => ({
@@ -108,7 +87,6 @@ export default function App() {
         ...doc.data()
       }));
       
-      // Sort in memory by updatedAt or createdAt (Rule 2)
       const sortedItems = fetchedItems.sort((a, b) => {
         const timeA = a.updatedAt?.seconds || 0;
         const timeB = b.updatedAt?.seconds || 0;
@@ -139,7 +117,8 @@ export default function App() {
     try {
       // Step A: Handle Cloud Storage Upload
       if (formData.imageFile) {
-        const storageRef = ref(storage, `artifacts/${appId}/${activeTab}/${Date.now()}_${formData.imageFile.name}`);
+        // ✨ Updated to use currentAppId
+        const storageRef = ref(storage, `artifacts/${currentAppId}/${activeTab}/${Date.now()}_${formData.imageFile.name}`);
         const uploadTask = uploadBytesResumable(storageRef, formData.imageFile);
 
         await new Promise((resolve, reject) => {
@@ -172,10 +151,12 @@ export default function App() {
 
       // Step C: Save to Firestore
       if (editingId) {
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', activeTab, editingId);
+        // ✨ Updated to use currentAppId
+        const docRef = doc(db, 'artifacts', currentAppId, 'public', 'data', activeTab, editingId);
         await updateDoc(docRef, payload);
       } else {
-        const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', activeTab);
+        // ✨ Updated to use currentAppId
+        const collectionRef = collection(db, 'artifacts', currentAppId, 'public', 'data', activeTab);
         await addDoc(collectionRef, { ...payload, createdAt: serverTimestamp() });
       }
 
@@ -210,7 +191,8 @@ export default function App() {
     if (!user) return;
     if (window.confirm("Delete this asset permanently?")) {
       try {
-        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', activeTab, id));
+        // ✨ Updated to use currentAppId
+        await deleteDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', activeTab, id));
       } catch (err) {
         console.error("Deletion failed:", err);
       }
@@ -450,8 +432,9 @@ export default function App() {
         </div>
       )}
       
+      {/* ✨ Updated to use currentAppId */}
       <footer className="text-center py-12 text-slate-300 text-[9px] font-black uppercase tracking-[0.5em]">
-        Globe Trail CRM — Real-time Content Gateway — {appId}
+        Globe Trail CRM — Real-time Content Gateway — {currentAppId}
       </footer>
     </div>
   );
