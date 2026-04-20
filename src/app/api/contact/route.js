@@ -6,6 +6,9 @@ export async function POST(request) {
     const data = await request.json();
     const { name, email, phone, destination, message, method } = data;
 
+    console.log("TESTING ENV VARS:");
+console.log("User:", process.env.EMAIL_USER); // Change this to match whatever your variable is named!
+console.log("Pass:", process.env.EMAIL_APP_PASSWORD ? "Password exists" : "PASSWORD MISSING");
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -13,6 +16,7 @@ export async function POST(request) {
         pass: process.env.GMAIL_APP_PASSWORD, 
       },
     });
+
 
     // Email sent to YOU (The Admin)
     const adminMailOptions = {

@@ -88,13 +88,24 @@ const handleSubmit = async (e) => {
     }
   ];
 
-  const socialLinks = [
-    { name: "Instagram", icon: <Instagram className="w-6 h-6" />, link: "#" },
-    { name: "Facebook", icon: <Facebook className="w-6 h-6" />, link: "#" },
-    { name: "Twitter", icon: <Twitter className="w-6 h-6" />, link: "#" },
-    { name: "LinkedIn", icon: <Linkedin className="w-6 h-6" />, link: "#" }
+const socialLinks = [
+    { 
+      name: "Instagram", 
+      icon: <Instagram className="w-6 h-6" />, 
+      link: "https://www.instagram.com/globetrailtravels_pvt_ltd?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
+    },
+    { 
+      name: "Facebook", 
+      icon: <Facebook className="w-6 h-6" />, 
+      link: "https://www.facebook.com/profile.php?id=61582067495111" 
+    },
+    // Twitter removed for now
+    { 
+      name: "LinkedIn", 
+      icon: <Linkedin className="w-6 h-6" />, 
+      link: "https://www.linkedin.com/company/globetrail-travels/" 
+    }
   ];
-
   return (
     <div className="bg-gradient-to-b from-slate-50 to-white min-h-screen font-sans pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -141,18 +152,20 @@ const handleSubmit = async (e) => {
 
             <div className="pt-6">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-6">Follow Our Journey</h3>
-              <div className="flex gap-4">
-                {socialLinks.map((social, index) => (
-                  <a 
-                    key={index}
-                    href={social.link}
-                    className="w-14 h-14 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-[#ff7f32] hover:border-[#ff7f32] hover:shadow-lg transition-all transform hover:scale-110"
-                    aria-label={social.name}
-                  >
-                    {social.icon}
-                  </a>
-                ))}
-              </div>
+<div className="flex gap-4">
+  {socialLinks.map((social, index) => (
+    <a 
+      key={index}
+      href={social.link}
+      target="_blank" // <--- Added this to open in new tab
+      rel="noopener noreferrer" // <--- Added this for security
+      className="w-14 h-14 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-[#ff7f32] hover:border-[#ff7f32] hover:shadow-lg transition-all transform hover:scale-110"
+      aria-label={social.name}
+    >
+      {social.icon}
+    </a>
+  ))}
+</div>
             </div>
           </div>
 

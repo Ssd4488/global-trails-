@@ -76,8 +76,8 @@ export default function HeroSection() {
           </h1>
 
           {/* Subheadline */}
-          <p className="mt-8 text-lg md:text-xl lg:text-2xl text-white font-medium max-w-3xl mx-auto drop-shadow-lg">
-            Curated journeys designed for the bold. Managed in real-time for your convenience.
+          <p className="mt-8 text-xl md:text-xl lg:text-2xl text-white font-medium max-w-3xl mx-auto drop-shadow-lg">
+            Explore The Globe, One Trail At A Time.
           </p>
 
           {/* Glowing Action Button */}
